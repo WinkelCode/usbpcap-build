@@ -1,3 +1,4 @@
 [submodule "usbpcap"]
 	path = usbpcap
 	url = https://github.com/desowin/usbpcap
+	shallow = true
