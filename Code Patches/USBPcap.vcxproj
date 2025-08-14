@@ -1,4 +1,6 @@
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Configurations -->
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|ARM64">
       <Configuration>Release</Configuration>
@@ -6,55 +8,73 @@
     </ProjectConfiguration>
   </ItemGroup>
 
+  <!-- Globals -->
   <PropertyGroup Label="Globals">
     <ProjectName>USBPcap</ProjectName>
-    <Keyword>Driver</Keyword>
     <RootNamespace>USBPcapDriver</RootNamespace>
-    <!-- Adjust WindowsTargetPlatformVersion if needed for your WDK -->
-    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Keyword>Driver</Keyword>
+
+    <!-- Use installed SDK/WDK. If unset, fall back to 10.0 (latest installed wins). -->
+    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)'==''">10.0</WindowsTargetPlatformVersion>
+    <SupportLatestWindowsTargetPlatformVersion>true</SupportLatestWindowsTargetPlatformVersion>
   </PropertyGroup>
 
-  <!-- Ensure VisualStudioVersion and VCTargetsPath have sensible defaults when MSBuild/CI doesn't set them -->
-  <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)'==''">17.0</VisualStudioVersion>
-    <VCTargetsPath Condition="'$(VCTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\</VCTargetsPath>
-  </PropertyGroup>
+  <!-- VS/VC defaults -->
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.props" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.props')" />
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+  <!-- Release|ARM64 configuration -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>Driver</ConfigurationType>
+    <DriverType>WDM</DriverType>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <TargetVersion>Windows10</TargetVersion>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <OutDir>$(MSBuildProjectDirectory)\obj\Release\$(Platform)\</OutDir>
+    <SpectreMitigation>false</SpectreMitigation>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <!-- WDK common props (packaging/signing/inf2cat targets etc.) -->
+  <Import Project="$(WindowsSdkDir)\build\WindowsDriver.Common.props" Condition="Exists('$(WindowsSdkDir)\build\WindowsDriver.Common.props')" />
+
+  <!-- Output dirs -->
+  <PropertyGroup>
+    <OutDir>$(MSBuildProjectDirectory)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(MSBuildProjectDirectory)\obj\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>USBPcap</TargetName>
     <TargetExt>.sys</TargetExt>
-    <LinkIncremental>false</LinkIncremental>
-    <GenerateDebugInformation>true</GenerateDebugInformation>
   </PropertyGroup>
 
+  <!-- Defaults for this configuration -->
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
-      <!-- project include + environment includes from WDK dev prompt -->
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\include;$(INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <!-- Project includes; WDK sets the rest -->
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>POOL_NX_OPTIN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
+
     <Link>
-      <AdditionalLibraryDirectories>$(LIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Wdm.lib;Wdmsec.lib;Ntstrsafe.lib;Ntoskrnl.lib;USBd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- WDK toolset provides lib paths; just name the libs -->
+      <AdditionalDependencies>NtosKrnl.lib;Wdm.lib;Wdmsec.lib;Ntstrsafe.lib;Usbd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Native</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalOptions>/driver %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
 
+  <!-- Sources -->
   <ItemGroup>
-    <!-- All C sources listed in [usbpcap/USBPcapDriver/SOURCES](usbpcap/USBPcapDriver/SOURCES) -->
     <ClCompile Include="USBPcapBuffer.c" />
     <ClCompile Include="USBPcapDeviceControl.c" />
     <ClCompile Include="USBPcapFilterManager.c" />
@@ -69,23 +89,31 @@
     <ClCompile Include="USBPcapURB.c" />
   </ItemGroup>
 
+  <!-- Resource -->
   <ItemGroup>
     <ResourceCompile Include="USBPcap.rc" />
   </ItemGroup>
 
-  <!-- Optional: include headers to make them visible in Solution Explorer -->
+  <!-- Headers (for Solution Explorer convenience) -->
   <ItemGroup>
+    <ClInclude Include="include\USBPcap.h" />
     <ClInclude Include="USBPcapMain.h" />
     <ClInclude Include="USBPcapURB.h" />
     <ClInclude Include="USBPcapHelperFunctions.h" />
     <ClInclude Include="USBPcapTables.h" />
-    <ClInclude Include="include\USBPcap.h" />
     <ClInclude Include="USBPcapBuffer.h" />
     <ClInclude Include="USBPcapQueue.h" />
     <ClInclude Include="USBPcapRootHubControl.h" />
   </ItemGroup>
 
-  <!-- Import the standard MSBuild C++ targets. The WDK customizations import should add driver-specific targets if available. -->
+  <!-- Packaging: include the .sys and the .inx (INF template). -->
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+    <Inf Include="USBPcap.inx" />
+  </ItemGroup>
+
+  <!-- Standard VC targets then WDK targets -->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.targets')" />
+  <Import Project="$(WindowsSdkDir)\build\WindowsDriver.Common.targets" Condition="Exists('$(WindowsSdkDir)\build\WindowsDriver.Common.targets')" />
+
 </Project>

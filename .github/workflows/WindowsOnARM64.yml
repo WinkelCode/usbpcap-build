@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: usbpcap-arm64
-          path: usbpcap/USBPcapDriver/obj/Release/ARM64/**
+          path: usbpcap/USBPcapDriver/bin/ARM64/Release/**
