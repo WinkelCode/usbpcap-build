@@ -16,6 +16,6 @@ jobs:
       - name: Apply patches
         shell: pwsh
         run: |
-          Get-ChildItem -Path 'Code Patches' -Filter '*.patch' | ForEach-Object {
-            git apply $_.FullName
+          Get-ChildItem -Path 'Code Patches' -Filter '*.patch' -File | ForEach-Object {
+            git apply -- "$($_.FullName)"
           }
