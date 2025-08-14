@@ -1,0 +1,85 @@
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <ProjectName>USBPcap</ProjectName>
+    <Keyword>Driver</Keyword>
+    <RootNamespace>USBPcapDriver</RootNamespace>
+    <!-- Adjust WindowsTargetPlatformVersion if needed for your WDK -->
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.props" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.props')" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ConfigurationType>Driver</ConfigurationType>
+    <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <OutDir>$(MSBuildProjectDirectory)\obj\Release\$(Platform)\</OutDir>
+    <TargetName>USBPcap</TargetName>
+    <TargetExt>.sys</TargetExt>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateDebugInformation>true</GenerateDebugInformation>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <!-- project include + environment includes from WDK dev prompt -->
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\include;$(INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>POOL_NX_OPTIN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(LIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Wdm.lib;Wdmsec.lib;Ntstrsafe.lib;Ntoskrnl.lib;USBd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Native</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>/driver %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);$(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <!-- All C sources listed in [usbpcap/USBPcapDriver/SOURCES](usbpcap/USBPcapDriver/SOURCES) -->
+    <ClCompile Include="USBPcapBuffer.c" />
+    <ClCompile Include="USBPcapDeviceControl.c" />
+    <ClCompile Include="USBPcapFilterManager.c" />
+    <ClCompile Include="USBPcapGenReq.c" />
+    <ClCompile Include="USBPcapHelperFunctions.c" />
+    <ClCompile Include="USBPcapMain.c" />
+    <ClCompile Include="USBPcapPnP.c" />
+    <ClCompile Include="USBPcapPower.c" />
+    <ClCompile Include="USBPcapRootHubControl.c" />
+    <ClCompile Include="USBPcapQueue.c" />
+    <ClCompile Include="USBPcapTables.c" />
+    <ClCompile Include="USBPcapURB.c" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ResourceCompile Include="USBPcap.rc" />
+  </ItemGroup>
+
+  <!-- Optional: include headers to make them visible in Solution Explorer -->
+  <ItemGroup>
+    <ClInclude Include="USBPcapMain.h" />
+    <ClInclude Include="USBPcapURB.h" />
+    <ClInclude Include="USBPcapHelperFunctions.h" />
+    <ClInclude Include="USBPcapTables.h" />
+    <ClInclude Include="include\USBPcap.h" />
+    <ClInclude Include="USBPcapBuffer.h" />
+    <ClInclude Include="USBPcapQueue.h" />
+    <ClInclude Include="USBPcapRootHubControl.h" />
+  </ItemGroup>
+
+  <!-- Import the standard MSBuild C++ targets. The WDK customizations import should add driver-specific targets if available. -->
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.targets')" />
+</Project>

@@ -14,31 +14,18 @@ jobs:
         with:
           submodules: true
       
-      - name: Run nmake2msbuild and MSBuild (capture verbose log)
-        # use cmd shell so we can call existing .bat files exactly as in local dev
+      - name: Copy build project
         shell: cmd
         run: |
-          echo Working directory: %GITHUB_WORKSPACE%
-          cd %GITHUB_WORKSPACE%\usbpcap
-          if exist config.bat (
-            CALL config.bat
-          ) else (
-            echo config.bat not found
-          )
-          cd USBPcapDriver
-          echo Running nmake2msbuild dirs (if available)
-          if exist nmake2msbuild (
-            nmake2msbuild dirs
-          ) else (
-            rem nmake2msbuild may be on PATH if WDK is installed; try to run anyway
-            nmake2msbuild dirs || echo nmake2msbuild failed or not found
-          )
-          echo Building solution (if generated)
-          if exist dirs.sln (
-            msbuild dirs.sln /p:Configuration=Release /p:Platform=ARM64 /v:diag > %GITHUB_WORKSPACE%\usbpcap_msbuild.log 2>&1
-          ) else (
-            echo dirs.sln not found, skipping msbuild and creating empty log
-            echo > %GITHUB_WORKSPACE%\usbpcap_msbuild.log
-          )
-          echo ===== MSBuild Log =====
-          type %GITHUB_WORKSPACE%\usbpcap_msbuild.log
+          copy "Code Patches\USBPcap.vcxproj" "usbpcap\USBPcapDriver\USBPcap.vcxproj"
+
+      - name: Build USBPcap
+        shell: cmd
+        run: |
+          msbuild "usbpcap\USBPcapDriver\USBPcap.vcxproj" /p:Configuration=Release /p:Platform=ARM64 /m /v:minimal
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: usbpcap-arm64
+          path: usbpcap/USBPcapDriver/obj/Release/ARM64/**
