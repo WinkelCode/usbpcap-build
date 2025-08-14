@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-11-arm
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: true
       - name: Apply patches
@@ -18,5 +18,5 @@ jobs:
         run: |
           # Use PowerShell to find and apply all .patch files in the "Code Patches" directory
           Get-ChildItem -Path 'Code Patches' -Filter '*.patch' | ForEach-Object {
-            patch -p0 < $_.FullName
+            patch -p0 -i $_.FullName
           }
