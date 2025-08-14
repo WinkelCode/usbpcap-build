@@ -1,5 +1,8 @@
-+++ usbpcap/USBPcapDriver/USBPcap.inx
-@@ -6,6 +6,7 @@
+diff --git a/usbpcap/USBPcapDriver/USBPcap.inx b/Code Patches/USBPcap.inx
+index 4f80265..86f5854 100644
+--- a/usbpcap/USBPcapDriver/USBPcap.inx
++++ b/Code Patches/USBPcap.inx	
+@@ -6,6 +6,7 @@ DriverPackageType   = ClassFilter
  Provider            = %PROVIDER%
  CatalogFile.NTx86   = USBPcapx86.cat
  CatalogFile.NTamd64 = USBPcapamd64.cat
@@ -7,7 +10,7 @@
  
  [DestinationDirs]
  DefaultDestDir = 12
-@@ -32,6 +33,14 @@
+@@ -32,6 +33,14 @@ AddReg    = USBPcap.AddReg
  DelFiles  = @USBPcap.sys
  DelReg    = USBPcap.DelReg
  
@@ -22,7 +25,7 @@
  [USBPcap.AddReg]
  ;Add USBPcap to UpperFilters
  HKLM, System\CurrentControlSet\Control\Class\{36FC9E60-C465-11CF-8056-444553540000}, UpperFilters, 0x00010008, USBPcap
-@@ -52,6 +61,12 @@
+@@ -52,6 +61,12 @@ AddService = USBPcap,,Service.AddService
  [DefaultUninstall.NTamd64.Services]
  DelService = USBPcap,0x00000200
  

@@ -16,7 +16,6 @@ jobs:
       - name: Apply patches
         shell: pwsh
         run: |
-          # Use PowerShell to find and apply all .patch files in the "Code Patches" directory
           Get-ChildItem -Path 'Code Patches' -Filter '*.patch' | ForEach-Object {
-            patch -p0 -i $_.FullName
+            git apply $_.FullName
           }
