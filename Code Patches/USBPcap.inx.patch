@@ -1,5 +1,4 @@
---- usbpcap/USBPcapDriver/USBPcap.inx	2025-08-14 17:36:40
-+++ Code Patches/USBPcap.inx	2025-08-14 17:55:12
++++ usbpcap/USBPcapDriver/USBPcap.inx
 @@ -6,6 +6,7 @@
  Provider            = %PROVIDER%
  CatalogFile.NTx86   = USBPcapx86.cat

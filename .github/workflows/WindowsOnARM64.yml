@@ -16,5 +16,5 @@ jobs:
       - name: Apply patches
         run: |
           for patch in ./Code\ Patches/*.patch; do
-            git apply "$patch"
+            patch -p0 <"$patch"
           done
