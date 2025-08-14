@@ -14,6 +14,12 @@
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
 
+  <!-- Ensure VisualStudioVersion and VCTargetsPath have sensible defaults when MSBuild/CI doesn't set them -->
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)'==''">17.0</VisualStudioVersion>
+    <VCTargetsPath Condition="'$(VCTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\</VCTargetsPath>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.props" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VC\v$(VisualStudioVersion)\BuildCustomizations\WindowsKernelModeDriver10.0.props')" />
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
